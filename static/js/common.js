@@ -1,6 +1,8 @@
 $.extend({
 	
-	url:'http://www.javaweb.io',
+	//url:'http://www.javaweb.io',
+	
+	url:'http://127.0.0.1:1024',
 	
 	log:console.log,
 	
@@ -53,6 +55,9 @@ $.extend({
 				tempXhr.withCredentials = true;
 				return tempXhr;
 			},
+			headers: {
+				"x-requested-with":"XMLHttpRequest",
+			},
 			contentType:options.contentType || 'application/x-www-form-urlencoded',
 			success:function(response){
 				if(response.success){
@@ -71,8 +76,29 @@ $.extend({
 				options.progress && $.messager.progress('close');
 			}
 		});
+	},
+	
+	formTest:function(form,call){
+		if(form.form('validate')){
+			call();
+		}else{
+			$.show('参数校验失败');
+		}
 	}
 });
 
+/**
+ * easyui 扩展
+ */
+$.extend($.fn.form.methods, {    
+	//在form表单校验通过的情况下,执行回调
+	test:function(jquery){
+		if(jquery.form('validate')){
+			return true;
+		}
+		$.show('参数校验失败')
+		return false;
+	}
+}); 
 
 

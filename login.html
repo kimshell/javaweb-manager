@@ -9,6 +9,49 @@
 	</head>
 	<body>
 		
+		<div class="easyui-window" data-options="
+			//width:300,
+			title:'javaweb开发者社区后台管理系统 ',
+			resizable:false,
+			constrain:true,
+			collapsible:false,
+			minimizable:false,
+			maximizable:false,
+			closable:false,
+		">
+			<form class="easyui-form" id="form">
+				<input type="hidden" id="verify-codeKey" name="codeKey"/>
+				<table>
+					<tr>
+						<td style="width: 50px;">账　户</td>
+						<td>
+							<input style="font-size: 15px;" name="account" class="easyui-textbox" data-options="width:200,height:35,iconCls:'icon-man',required:true,prompt:'邮箱或者用户名'"/>
+						</td>
+					</tr>
+					<tr>
+						<td style="width: 50px;">密　码</td>
+						<td>
+							<input style="font-size: 15px;" name="password" class="easyui-passwordbox" data-options="width:200,height:35,prompt:'登录密码'"/>
+						</td>
+					</tr>
+					
+					<tr id="verify-input">
+						<td style="width: 50px;">验证码</td>
+						<td>
+							<input style="font-size: 15px;" name="verifyCode" class="easyui-textbox" data-options="width:125,height:35,prompt:'人类验证'"/>
+							<img id="verify-img" width="75px;" height="35px;" style="float: right;cursor: pointer;"/>
+						</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2">
+							<a class="easyui-linkbutton" data-options="width:253,iconCls:'icon-ok',onClick:login">登录</a>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		
 	</body>
 	<script type="text/javascript" src="./static/easyui/jquery.min.js"></script>
 	<script type="text/javascript" src="./static/easyui/jquery.easyui.min.js"></script>
@@ -16,7 +59,35 @@
 	<script type="text/javascript" src="./static/js/common.js"></script>
 	<script type="text/javascript">
 		$(function(){
-			
+			$('#verify-img').click(function(){
+				$.doAjax({
+					url:'/verifyCode',
+					method:'GET',
+					progress:false,
+					showSuccessMessage:false,
+					success:function(rep){
+						$('#verify-img').attr({'src':rep.data.code});
+						$('#verify-codeKey').val(rep.data.cokeKey);
+					}
+				});
+			});
 		});
+		function login(){
+			$.formTest($('#form'),function(){
+				$.doAjax({
+					url:'/manager/login',
+					data:$('#form').serializeArray(),
+					success:function(rep){
+						window.location.href = "./index.html";
+					},
+					error:function(rep){
+						if(rep.status == 'MISSING_VERIFY_CODE'){
+							//触发验证码显示事件,并且刷新验证码
+						}
+						//如果是已经触发验证码状态下,刷新验证码
+					}
+				});
+			});
+		}
 	</script>
 </html>
