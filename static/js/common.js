@@ -89,16 +89,8 @@ $.extend({
 
 /**
  * easyui 扩展
- */
+
 $.extend($.fn.form.methods, {    
-	//在form表单校验通过的情况下,执行回调
-	test:function(jquery){
-		if(jquery.form('validate')){
-			return true;
-		}
-		$.show('参数校验失败')
-		return false;
-	}
-}); 
+});  */
 
 
