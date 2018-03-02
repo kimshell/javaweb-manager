@@ -13,6 +13,7 @@
 			//width:300,
 			title:'javaweb开发者社区后台管理系统 ',
 			resizable:false,
+			//height:300,
 			constrain:true,
 			collapsible:false,
 			minimizable:false,
@@ -31,11 +32,11 @@
 					<tr>
 						<td style="width: 50px;">密　码</td>
 						<td>
-							<input style="font-size: 15px;" name="password" class="easyui-passwordbox" data-options="width:200,height:35,prompt:'登录密码'"/>
+							<input style="font-size: 15px;" name="password" class="easyui-passwordbox" data-options="width:200,height:35,prompt:'登录密码',required:true"/>
 						</td>
 					</tr>
 					
-					<tr id="verify-input">
+					<tr id="verify-input" hidden="hide">
 						<td style="width: 50px;">验证码</td>
 						<td>
 							<input style="font-size: 15px;" name="verifyCode" class="easyui-textbox" data-options="width:125,height:35,prompt:'人类验证'"/>
@@ -82,9 +83,12 @@
 					},
 					error:function(rep){
 						if(rep.status == 'MISSING_VERIFY_CODE'){
-							//触发验证码显示事件,并且刷新验证码
+							$('#verify-input').removeAttr("hidden");
+							$('#verify-img').click();
 						}
-						//如果是已经触发验证码状态下,刷新验证码
+						if(!$('#verify-input').attr('hidden')){
+							$('#verify-img').click();
+						}
 					}
 				});
 			});
