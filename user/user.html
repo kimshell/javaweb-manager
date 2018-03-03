@@ -7,16 +7,123 @@
 		<link rel="stylesheet" href="../static/easyui/themes/icon.css">
 		<title>用户管理</title>
 	</head>
-	<body>
-		
-	</body>
+	<body class="easyui-layout">   
+	    <div data-options="region:'north',title:'数据过滤',split:false,iconCls:'icon-search'" style="height:100px;">
+	    </div>   
+	    <div data-options="region:'center'">
+	    	<table id="datagrid" style="width: 100%;height: 100%;"></table>
+	    </div>   
+	</body>  
 	<script type="text/javascript" src="../static/easyui/jquery.min.js"></script>
 	<script type="text/javascript" src="../static/easyui/jquery.easyui.min.js"></script>
 	<script type="text/javascript" src="../static/easyui/locale/easyui-lang-zh_CN.js"></script>
 	<script type="text/javascript" src="../static/js/common.js"></script>
 	<script type="text/javascript">
 		$(function(){
-			
+			$('#datagrid').datagrid({
+				url:$.url + '/manager/user',
+				method:'GET',
+				fitColumns:true,
+				striped:true,
+				pagination:true,
+				rownumbers:true,
+				multiSort:true,
+				nowrap:false,		//超出数据,换行显示
+				pageSize:20,
+				pageList:[10,20,30,40,50,100,500,1000],
+				loadFilter:$.loadFilter,
+				toolbar:[{
+					text:'批量启用',
+					width:100,
+					iconCls:'icon-ok',
+					handler:function(){
+						var user = $.getOne();
+						console.log(user);
+					}
+				},'-',{
+					text:'批量禁用',
+					width:100,
+					iconCls:'icon-no',
+					handler:function(){
+						var users = $.getMore();
+						console.log(users);
+					}
+				}],
+				columns:[[
+					 {field:'userId',title:'ID',align:'center',sortable:true,width:50,checkbox:true},
+					 {field:'portrait',title:'头像',align:'left',sortable:false,width:20,formatter:function(value,row,index){
+						 return "<img src=\""+row.portrait+"\" width=\"50px;\" height=\"50px;\"/>";
+					 }},
+					 {field:'name',title:'账户名称',align:'left',sortable:true,width:30},
+					 {field:'email',title:'邮件地址',align:'left',sortable:true,width:30},
+					 /*{field:'age',title:'年龄',align:'left',sortable:true,width:30,formatter:function(value,row,index){
+						 return '-';
+					 }},
+					 {field:'gender',title:'性别',align:'left',sortable:true,width:30,formatter:function(value,row,index){
+						 return '-';
+					 }},*/
+					 {field:'personality',title:'个性签名',align:'left',sortable:true,width:30},
+					 {field:'site',title:'个人站点',align:'center',sortable:true,width:15,formatter:function(value,row,index){
+						 if(!row.site){
+							 return '';
+						 }
+						 return "<a href=\""+row.site+"\" target=\"_blank\">点击打开</a>";
+					 }},
+					 {field:'github',title:'github',align:'center',sortable:true,width:15,formatter:function(value,row,index){
+						 if(!row.github){
+							 return '';
+						 }
+						 return "<a href=\""+row.github+"\" target=\"_blank\">点击打开</a>";
+					 }},
+					 {field:'role',title:'角色',align:'center',sortable:true,width:30,formatter:function(value,row,index){
+						switch (row.role) {
+							case 'USER':{
+								 return "<span>用户<span>";
+							}
+							case 'MANAGER':{
+								 return "<span style=\"color:orange;\">管理员<span>";
+							}
+							case 'ADMIN':{
+								return "<span style=\"color:purple;\">站长<span>";
+							}
+							default:{
+								break;
+							}
+						}
+					 }},
+					 {field:'emailVerifi',title:'邮箱验证',align:'center',sortable:true,width:15,formatter:function(value,row,index){
+						 if(row.emailVerifi){
+							 return "<span style=\"color:green;\">已认证<span>";
+						 }else{
+							 return "<span style=\"color:red;\">未认证<span>";
+						 }
+						 
+					 }},
+					 {field:'status',title:'账户状态',align:'center',sortable:true,width:30,formatter:function(value,row,index){
+							switch (row.status) {
+								case 'NORMAL':{
+									 return "<span style=\"color:green;\">正常<span>";
+								}
+								case 'DISABLE':{
+									 return "<span style=\"color:red;\">禁用<span>";
+								}
+								case 'DELETED':{
+									return "<span style=\"color:red;\">删除<span>";
+								}
+								default:{
+									break;
+								}
+							}
+					}},
+					 {field:'createDate',title:'注册时间',align:'center',sortable:true,width:30},
+					 /**{field:'phoneVerifi',title:'手机验证',align:'left',sortable:true,width:15,formatter:function(value,row,index){
+						 return "-";
+					 }},**/
+					 /**loginRadio
+					 browseRadio
+					 replyRadio**/
+				]]
+			});
 		});
 	</script>
 </html>

@@ -84,7 +84,36 @@ $.extend({
 		}else{
 			$.show('参数校验失败');
 		}
-	}
+	},
+	loadFilter:function(rep){
+		if(!rep.success){
+			$.error(rep.message);
+			return [];
+		}
+		return rep.data;
+	},
+	getMore:function(datagrid){
+		if(!datagrid){
+			datagrid = $('#datagrid');
+		}
+		var checkeds = datagrid.datagrid('getChecked');
+		if(checkeds.length == 0){
+			$.warning('起码选择一行');
+			return;
+		}
+		return checkeds;
+	},
+	getOne:function(datagrid){
+		var checked = $.getMore(datagrid);
+		if(!checked){
+			return;
+		}
+		if(checked.length > 1){
+			$.warning('只能选择一行');
+			return;
+		}
+		return checked[0];
+	},
 });
 
 /**
