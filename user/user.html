@@ -12,7 +12,55 @@
 	    </div>   
 	    <div data-options="region:'center'">
 	    	<table id="datagrid" style="width: 100%;height: 100%;"></table>
-	    </div>   
+	    </div>
+	    
+	    <!-- 修改密码 -->   
+	    <div id="updatepass-window" class="easyui-window" data-options="
+	    	title:'修改登录密码',
+	    	iconCls:'icon-lock',
+	    	resizable:false,
+	    	maximizable:false,
+	    	minimizable:false,
+	    	collapsible:false,
+	    	constrain:true,
+	    	closed:true,
+	    	modal:true,
+	    	width:300,
+	    	onClose:function(){
+	    		$('#updatepass-form').form('clear');
+	    	}
+	    ">
+	    	<form class="easyui-form" id="updatepass-form">
+	    		<input type="hidden" name="userId"/>
+	    		<table>
+	    			<tr>
+	    				<td>请输入新密码</td>
+	    				<td>
+	    					<input name="password" class="easyui-textbox" data-options="width:200,required:true,prompt:'请输入新密码',validType:'password'"/>
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td colspan="2">
+	    					<a class="easyui-linkbutton" data-options="
+	    						width:280,
+	    						iconCls:'icon-ok',
+	    						onClick:function(){
+	    							$.formTest($('#updatepass-form'),function(){
+	    								$.doAjax({
+	    									url:'/manager/user/updatePass',
+	    									data:$('#updatepass-form').serialize(),
+	    									success:function(){
+	    										$('#updatepass-window').window('close');
+	    									}
+	    								});
+	    							});
+	    						}
+	    					">确定</a>
+	    				</td>
+	    			</tr>
+	    		</table>
+	    	</form>
+	    </div>
 	</body>  
 	<script type="text/javascript" src="../static/easyui/jquery.min.js"></script>
 	<script type="text/javascript" src="../static/easyui/jquery.easyui.min.js"></script>
@@ -32,13 +80,33 @@
 				pageSize:20,
 				pageList:[10,20,30,40,50,100,500,1000],
 				loadFilter:$.loadFilter,
+				onLoadSuccess:function(rep){
+				},
+				onLoadError:$.loadError,
 				toolbar:[{
 					text:'批量启用',
 					width:100,
 					iconCls:'icon-ok',
 					handler:function(){
-						var user = $.getOne();
-						console.log(user);
+						var users = $.getMore();
+						if(users){
+							$.messager.confirm('警告','确定要启用所选: ' + users.length + ' 个用户吗?',function(r){
+								if(!r){
+									return;
+								}
+								$.doAjax({
+									url:'/manager/user/status',
+									contentType:'application/json;charset=utf-8',
+									data:JSON.stringify({
+										userIds:users.map(function(i){return i.userId}),
+										type:'NORMAL'
+									}),
+									success:function(){
+										$('#datagrid').datagrid('reload');
+									}
+								});
+							});
+						}
 					}
 				},'-',{
 					text:'批量禁用',
@@ -46,15 +114,56 @@
 					iconCls:'icon-no',
 					handler:function(){
 						var users = $.getMore();
-						console.log(users);
+						if(users){
+							var me = $.me();
+							for(let x = 0 ;x < users.length ; x++){
+								if(users[x].role == 'ADMIN' && me.role != 'ADMIN'){
+									$.warning('无权修改站长:' + users[x].name + ' 的账户状态');
+									return;
+								}
+								if(users[x].role == 'MANAGER' && me.role != 'ADMIN'){
+									$.warning('无权修改管理员:' + users[x].name + ' 的账户状态');
+									return;
+								}
+							}
+							$.messager.confirm('警告','确定要禁用所选: ' + users.length + ' 个用户吗?',function(r){
+								if(!r){
+									return;
+								}
+								$.doAjax({
+									url:'/manager/user/status',
+									contentType:'application/json;charset=utf-8',
+									data:JSON.stringify({
+										userIds:users.map(function(i){return i.userId}),
+										type:'DISABLE'
+									}),
+									success:function(){
+										$('#datagrid').datagrid('reload');
+									}
+								});
+							});
+						}
 					}
-				}],
+				},'-',{
+					text:'修改密码',
+					width:100,
+					iconCls:'icon-lock',
+					handler:function(){
+						var user = $.getOne();
+						if(user){
+							$('#updatepass-form').form('load',{userId:user.userId});
+							$('#updatepass-window').window('open');
+						}
+					}
+				},'-'],
 				columns:[[
 					 {field:'userId',title:'ID',align:'center',sortable:true,width:50,checkbox:true},
 					 {field:'portrait',title:'头像',align:'left',sortable:false,width:20,formatter:function(value,row,index){
 						 return "<img src=\""+row.portrait+"\" width=\"50px;\" height=\"50px;\"/>";
 					 }},
-					 {field:'name',title:'账户名称',align:'left',sortable:true,width:30},
+					 {field:'name',title:'账户名称',align:'left',sortable:true,width:30,formatter:function(value,row,index){
+						 return "<a href=\"http://www.javaweb.io/user/"+row.userId+"\" target=\"_blank\">"+row.name+"</a>";
+					 }},
 					 {field:'email',title:'邮件地址',align:'left',sortable:true,width:30},
 					 /*{field:'age',title:'年龄',align:'left',sortable:true,width:30,formatter:function(value,row,index){
 						 return '-';
@@ -124,6 +233,10 @@
 					 replyRadio**/
 				]]
 			});
+			
+			if($.me().role != 'ADMIN'){
+				$('div.datagrid-toolbar a').eq(2).linkbutton('disable');
+			}
 		});
 	</script>
 </html>

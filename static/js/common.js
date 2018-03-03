@@ -24,6 +24,10 @@ $.extend({
 		});
 	},
 	
+	loadError:function(){
+		$.error('执行异常,请检查本地网络环境,或者联系管理员');
+	},
+	
 	doAjax:function(options){
 		
 		if(options.progress == undefined){
@@ -64,7 +68,7 @@ $.extend({
 					options.showSuccessMessage && $.show(response.message)
 					options.success && options.success(response);
 				}else{
-					options.alertErrorMessage && $.warning(response.message);
+					options.alertErrorMessage && $.error(response.message);
 					options.error && options.error(response);
 				}
 			},
@@ -114,12 +118,36 @@ $.extend({
 		}
 		return checked[0];
 	},
+	me:function(){
+		var user = window.sessionStorage.getItem('user_info');
+		return user ? JSON.parse(user) : null;
+	},
 });
 
-/**
- * easyui 扩展
 
-$.extend($.fn.form.methods, {    
-});  */
+$.extend($.fn.validatebox.defaults.rules, {    
+    equals: {    
+        validator: function(value,param){  
+        	//param[0]是第二个输入框的id
+            return value == $(param[0]).val();    
+        },    
+        message: '两次输入不一致'   
+    }    
+}); 
 
+$.extend($.fn.validatebox.defaults.rules, {    
+	equals: {    
+        validator: function(value,param){  
+            return value == $(param[0]).val();    
+        },    
+        message: '两次输入不一致'   
+    },    
+    password: {    
+        validator: function(value,param){
+        	return new RegExp("^[^\\u4e00-\\u9fa5\\s]{6,16}$").test(value);
+            return value == $(param[0]).val();    
+        },    
+        message: '密码格式不正确,不能有汉字或者空格 6 - 16位'   
+    }    
+}); 
 
