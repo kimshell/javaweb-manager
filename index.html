@@ -17,10 +17,6 @@
 	    <div data-options="region:'center'">
 	    
 	    	<div id="tabs">   
-			    <div title="欢迎登录" data-options=''>   
-			    </div>  
-			     <div title="Tab1">   
-			    </div>    
 			</div>  
 			
 	    </div>   
@@ -31,12 +27,28 @@
 	<script type="text/javascript" src="./static/js/common.js"></script>
 	<script type="text/javascript">
 		$(function(){
+			//tabs 初始化
 			$('#tabs').tabs({
 				fit:true,
 				border:false,
 				justified:true,
-				narrow:true,
-				pill:true,
+				narrow:false,
+				pill:false
+			});
+			//用户信息 && 页面渲染
+			$.doAjax({
+				url:'/manager/init',
+				method:'GET',
+				progressMessage:'初始化中...',
+				showSuccessMessage:false,
+				success:function(rep){
+					$('#tabs').tabs('add',{
+                        title:'欢迎您管理员:' + rep.data.name,
+                        closable:false,
+                        cache:true,
+                        content:"<iframe scrolling=\"auto\" frameborder=\"0\" src=\"./welconme/welcome.html\" style='width:100%;height:100%;'></iframe>",
+                    });
+				}
 			});
 		});
 	</script>

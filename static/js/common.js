@@ -58,7 +58,7 @@ $.extend({
 			headers: {
 				"x-requested-with":"XMLHttpRequest",
 			},
-			contentType:options.contentType || 'application/x-www-form-urlencoded',
+			contentType:options.contentType || 'application/x-www-form-urlencoded; charset=UTF-8',
 			success:function(response){
 				if(response.success){
 					options.showSuccessMessage && $.show(response.message)
