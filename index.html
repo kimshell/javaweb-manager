@@ -12,13 +12,12 @@
 	    <div data-options="region:'south',split:true,collapsible:false,split:false" style="height:100px;">
 	    </div>   
 	    <div data-options="region:'west',title:'菜单',split:true,iconCls:'icon-tip',split:false" style="width:150px;">
-	    	
+	    	<ul id="menus">
+	    	</ul>
 	    </div>   
 	    <div data-options="region:'center'">
-	    
-	    	<div id="tabs">   
+	    	<div id="tabs"> 
 			</div>  
-			
 	    </div>   
 	</body>  
 	<script type="text/javascript" src="./static/easyui/jquery.min.js"></script>
@@ -35,6 +34,51 @@
 				narrow:false,
 				pill:false
 			});
+			//menus初始化
+			$('#menus').tree({
+				animate:true,
+				lines:true,
+				onDblClick:function (node) {
+                    $(this).tree('toggle',node.target);
+                },
+				onClick:function(node){
+					if(node.children){
+						return;
+					}
+					if($('#tabs').tabs('exists',node.text)){
+						$('#tabs').tabs('select',node.text);
+					}else{
+						$('#tabs').tabs('add',{
+							title:node.text,
+	                        closable:true,
+	                        cache:true,
+	                        content:"<iframe scrolling=\"auto\" frameborder=\"0\" src=\""+ node.url + "\" style='width:100%;height:100%;'></iframe>",
+						});
+					}
+				},
+				data:[{
+				    text:'用户管理',    
+				    state:'closed',
+				    children:[{
+					    text:'用户管理',
+					    url:'./user/user.html',
+				    }]
+				},{
+				    text:'帖子管理',
+				    state:'closed',
+				    children:[{
+					    text:'帖子管理',
+					    url:'./post/post.html',
+				    }]
+				},{
+				    text:'系统管理',
+				    state:'closed',
+				    children:[{
+					    text:'友情连接管理', 
+					    url:'./system/frendlink.html',
+				    }]
+				}]
+			});
 			
 			//init
 			$.doAjax({
@@ -44,6 +88,7 @@
 				showSuccessMessage:false,
 				alertErrorMessage:false,
 				success:function(rep){
+					window.sessionStorage.setItem('user_info',JSON.stringify(rep.data));
 					$('#tabs').tabs('add',{
                         title:'欢迎您管理员:' + rep.data.name,
                         closable:false,
@@ -52,8 +97,8 @@
                     });
 				},
 				error:function(rep){
-					if(rep.status == 'NOT_LOGGED_IN'){
-						//未登录,重定向到登录页
+					if(rep.status == 'NOT_LOGGED_IN' || rep.status == 'NO_PERMISSION'){
+						//未登录或者无权操作,重定向到登录页
 						window.top.location.href = './login.html';
 					}else{
 						//未知错误,弹出警告
