@@ -53,8 +53,10 @@
 				},
 				error:function(rep){
 					if(rep.status == 'NOT_LOGGED_IN'){
+						//未登录,重定向到登录页
 						window.top.location.href = './login.html';
 					}else{
+						//未知错误,弹出警告
 						$.warning(rep.message);
 					}
 				}
