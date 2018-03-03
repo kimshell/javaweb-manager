@@ -2,7 +2,7 @@ $.extend({
 	
 	//url:'http://www.javaweb.io',
 	
-	url:'http://127.0.0.1:1024',
+	url:'http://www.javaweb.io',
 	
 	log:console.log,
 	
