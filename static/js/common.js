@@ -145,7 +145,6 @@ $.extend($.fn.validatebox.defaults.rules, {
     password: {    
         validator: function(value,param){
         	return new RegExp("^[^\\u4e00-\\u9fa5\\s]{6,16}$").test(value);
-            return value == $(param[0]).val();    
         },    
         message: '密码格式不正确,不能有汉字或者空格 6 - 16位'   
     }    
