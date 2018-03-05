@@ -5,18 +5,224 @@
 		<link rel="shortcut icon" type="image/x-icon" href="../static/icon/green-200-icon.png"/>
 		<link rel="stylesheet" href="../static/easyui/themes/default/easyui.css">
 		<link rel="stylesheet" href="../static/easyui/themes/icon.css">
-		<title>系统管理</title>
+		<title>友情连接管理</title>
 	</head>
-	<body>
-		
-	</body>
+	<body class="easyui-layout">   
+	    <div data-options="region:'north',title:'数据过滤',split:false,iconCls:'icon-search',height:60">
+	    </div>   
+	    <div data-options="region:'center'">
+	    	<table id="datagrid" style="width: 100%;height: 100%;"></table>
+	    </div>
+	    
+	    <div id="window" class="easyui-window" data-options="
+	    	resizable:false,
+	    	maximizable:false,
+	    	minimizable:false,
+	    	collapsible:false,
+	    	constrain:true,
+	    	closed:true,
+	    	modal:true,
+	    	width:250,
+	    	onClose:function(){
+	    		$('#form').form('clear');
+	    		$('#logo-src').attr({'src':'http://www.javaweb.io/static/image/friendlink.png'});
+	    	}
+	    ">
+	    	<form class="easyui-form" id="form">
+	    		<input name="frendLinkId" type="hidden"/>
+	    		<input name="logo" type="hidden"/>
+	    		<table>
+	    			<tr>
+	    				<td colspan="2" style="text-align: center;">
+	    					<img id="logo-src" width="50px;" height="50px;" src="http://www.javaweb.io/static/image/friendlink.png">
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>log</td>
+	    				<td>
+	    					<input class="easyui-filebox" data-options="
+	    						width:200,
+	    						prompt:'jpg,png,gif',
+	    						accept:'image/*',
+	    						buttonText:'请选择图片文件',
+	    						onChange:function(newValue,oldValue){
+	    							if(newValue){
+	    								var file = $(this).filebox('files')[0];
+	    								if(file.size > (1024 * 100)){
+	    									$.warning('logo图片大小不能高于100KB');
+	    									$(this).filebox('clear');
+	    									return;
+	    								}
+	    								$.messager.progress({text:'上传中...'});
+	    								var formData = new FormData();
+	    								formData.set('file',file);
+	    								$.ajax({
+	    									url:$.url + '/manager/friendLink/upload',
+	    									method:'POST',
+	    									data:formData,
+	    									dataType:'json',
+	    									processData : false,
+											contentType : false,
+											xhr: function(){                            
+												var tempXhr = $.ajaxSettings.xhr();		
+												tempXhr.withCredentials = true;
+												return tempXhr;
+											},
+											headers: {
+												'x-requested-with':'XMLHttpRequest'
+											},
+	    									success:function(rep){
+	    										if(rep.success){
+	    											$('input[name=\'logo\']').val(rep.data); 
+	    											$('#logo-src').attr({src:rep.data});
+	    										}else{
+	    											$.error(rep.message);
+	    										}
+	    									},
+	    									error:function(e){
+	    										$.error('上传异常,请检查本地网络环境或者联系管理员');
+	    									},
+	    									complete:function(){
+	    										$.messager.progress('close');
+	    									}
+	    								});
+	    							}
+	    						}
+	    					"/>
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>名称</td>
+	    				<td>
+	    					<input name="name" class="easyui-textbox" data-options="width:200,required:true,prompt:'请输入名称',validType:'empty'"/>
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>url</td>
+	    				<td>
+	    					<input name="url" class="easyui-textbox" data-options="width:200,required:true,prompt:'请输入url',validType:'empty'"/>
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td>权重</td>
+	    				<td>
+	    					<input name="sorted" class="easyui-numberbox" data-options="width:200,required:true,prompt:'请输入权重',min:-999,max:999"/>
+	    				</td>
+	    			</tr>
+	    			<tr>
+	    				<td colspan="2">
+	    					<a id="button" class="easyui-linkbutton" data-url="/manager/friendLink/create" data-options="
+	    						width:230,
+	    						iconCls:'icon-ok',
+	    						onClick:function(){
+	    							$.formTest($('#form'),function(){
+	    								$.doAjax({
+	    									url:$('#button').attr('data-url'),
+	    									data:$('#form').serialize(),
+	    									success:function(){
+	    										$('#window').window('close');
+	    										$('#datagrid').datagrid('reload');
+	    									}
+	    								});
+	    							});
+	    						}
+	    					">确定</a>
+	    				</td>
+	    			</tr>
+	    		</table>
+	    	</form>
+	    </div>
+	</body>  
 	<script type="text/javascript" src="../static/easyui/jquery.min.js"></script>
 	<script type="text/javascript" src="../static/easyui/jquery.easyui.min.js"></script>
 	<script type="text/javascript" src="../static/easyui/locale/easyui-lang-zh_CN.js"></script>
 	<script type="text/javascript" src="../static/js/common.js"></script>
 	<script type="text/javascript">
 		$(function(){
+			$('#datagrid').datagrid({
+				url:$.url + '/manager/friendLink',
+				method:'GET',
+				fitColumns:true,
+				striped:true,
+				pagination:true,
+				rownumbers:true,
+				multiSort:true,
+				nowrap:false,		//超出数据,换行显示
+				pageSize:20,
+				pageList:[10,20,30,40,50,100,500,1000],
+				loadFilter:$.loadFilter,
+				onLoadSuccess:function(rep){
+				},
+				queryParams: {
+					sort: 'sorted',
+					order: 'desc'
+				},
+				onLoadError:$.loadError,
+				toolbar:[{
+					text:'添加',
+					width:100,
+					iconCls:'icon-add',
+					handler:function(){
+						$('#button').attr({'data-url':'/manager/friendLink/create'});
+						$('#window').window('setTitle','添加新的友情连接').window('open');
+					}
+				},'-',{
+					text:'编辑',
+					width:100,
+					iconCls:'icon-edit',
+					handler:function(){
+						var f = $.getOne();
+						if(f){
+							if(f.logo){
+								$('#logo-src').attr({src:f.logo});
+							}
+							$('#form').form('load',f);
+							$('#button').attr({'data-url':'/manager/friendLink/update'});
+							$('#window').window('setTitle','编辑友情连接').window('open');;
+						}
+					}
+				},'-',{
+					text:'删除',
+					width:100,
+					iconCls:'icon-lock',
+					handler:function(){
+						var fs = $.getMore();
+						if(fs){
+							$.messager.confirm('警告','确定要删除所选的:' + fs.length + ' ,条记录吗?',function(r){
+								if(r){
+									$.doAjax({
+										url:'/manager/friendLink/delete',
+										data:'firendLinkIds=' + fs.map(function(i){return i.frendLinkId}).join(','),
+										success:function(){
+											$('#datagrid').datagrid('reload');
+										}
+									});
+								}
+							});
+						}
+					}
+				},'-'],
+				columns:[[
+					 {field:'frendLinkId',title:'ID',align:'center',sortable:true,width:50,checkbox:true},
+					 {field:'logo',title:'log',align:'center',sortable:true,width:50,formatter:function(value,row,index){
+						 if(row.logo){
+							 return "<img src=\""+row.logo+"\" width=\"30px;\" height=\"30px;\">";
+						 }else{
+							 return "<img src=\"http://www.javaweb.io/static/image/friendlink.png\" width=\"30px;\" height=\"30px;\">";
+						 }
+					 }},
+					 {field:'name',title:'站点名称',align:'left',sortable:true,width:50},
+					 {field:'url',title:'站点地址',align:'left',sortable:true,width:50},
+					 {field:'sorted',title:'权重',align:'center',sortable:true,width:50},
+					 {field:'createDate',title:'创建日期',align:'center',sortable:true,width:50},
+				]]
+			});
 			
+			if($.me().role != 'ADMIN'){
+				$('div.datagrid-toolbar a').eq(0).linkbutton('disable');
+				$('div.datagrid-toolbar a').eq(1).linkbutton('disable');
+				$('div.datagrid-toolbar a').eq(2).linkbutton('disable');
+			}
 		});
 	</script>
 </html>

@@ -1,8 +1,8 @@
 $.extend({
 	
-	url:'http://www.javaweb.io',
+	//url:'http://www.javaweb.io',
 	
-	//url:'http://127.0.0.1:1024',
+	url:'http://127.0.0.1:1024',
 	
 	log:console.log,
 	
@@ -147,6 +147,18 @@ $.extend($.fn.validatebox.defaults.rules, {
         	return new RegExp("^[^\\u4e00-\\u9fa5\\s]{6,16}$").test(value);
         },    
         message: '密码格式不正确,不能有汉字或者空格 6 - 16位'   
-    }    
+    },
+    reg:{
+    	validator: function(value,param){
+        	return new RegExp(param[0]).test(value);
+        },
+        message: '参数不符合规范'  
+    },
+    empty:{
+    	validator: function(value,param){
+        	return !(value.trim() == '');
+        },
+        message: '参数不能为空'  
+    },
 }); 
 
