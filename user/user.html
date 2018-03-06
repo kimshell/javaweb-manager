@@ -155,6 +155,42 @@
 							$('#updatepass-window').window('open');
 						}
 					}
+				},'-',{
+					text:'设置管理员',
+					width:100,
+					iconCls:'icon-man',
+					handler:function(){
+						var users = $.getMore();
+						if(users){
+							$.messager.confirm('警告','确定要设置管理员身份吗?',function(r){
+								$.doAjax({
+									url:'/manager/user/setManager',
+									data:'type=seting&userIds=' + users.map(function(i){return i.userId}).join(','),
+									success:function(){
+										$('#datagrid').datagrid('reload');
+									}
+								});
+							});
+						}
+					}
+				},'-',{
+					text:'取消管理员',
+					width:100,
+					iconCls:'icon-cancel',
+					handler:function(){
+						var users = $.getMore();
+						if(users){
+							$.messager.confirm('警告','确定要取消管理员身份吗?',function(r){
+								$.doAjax({
+									url:'/manager/user/setManager',
+									data:'type=cancel&userIds=' + users.map(function(i){return i.userId}).join(','),
+									success:function(){
+										$('#datagrid').datagrid('reload');
+									}
+								});
+							});
+						}
+					}
 				},'-'],
 				columns:[[
 					 {field:'userId',title:'ID',align:'center',sortable:true,width:50,checkbox:true},
@@ -236,6 +272,8 @@
 			
 			if($.me().role != 'ADMIN'){
 				$('div.datagrid-toolbar a').eq(2).linkbutton('disable');
+				$('div.datagrid-toolbar a').eq(3).linkbutton('disable');
+				$('div.datagrid-toolbar a').eq(4).linkbutton('disable');
 			}
 		});
 	</script>
